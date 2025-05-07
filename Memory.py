@@ -13,6 +13,7 @@ class Scope:
         self.execution_tree = None
         self.variables: dict = dict()
         self.scopes: dict = dict()
+        self.arguments: dict[str, Variable] = dict()
 
 class ClassScope(Scope):
     def __init__(self):
@@ -25,7 +26,7 @@ class FunctionScope(Scope):
 
 class Table:
     variable_table: dict = dict() # Identifier: Index in value_table
-    scope_table: dict = dict() # Scope Id: Scope Object
+    scope_table: dict[str, Scope] = dict() # Scope Id: Scope Object
     function_table: dict = dict() # Identifier: Function Scope Object
     class_table: dict = dict() # Identifier: Class Scope Object
     callable_table: dict = dict() #
@@ -33,3 +34,7 @@ class Table:
     @classmethod
     def create_variable(cls, name, value, dtype):
         cls.variable_table[name] = Variable(value, dtype)
+
+    @classmethod
+    def update_variable(cls, name, value):
+        cls.variable_table.get(name).value = value

@@ -5,7 +5,7 @@ class Token:
     def __repr__(self):
         return f'{self.type}: {self.value}' if self.value is not None else f'{self.type}'
 
-KEYWORDL = ['int', 'float', 'string', 'void']
+KEYWORDL = ['int', 'float', 'string', 'void', 'func', 'scope']
 
 STRING = 'STRING'
 NUMBER = 'NUMBER'

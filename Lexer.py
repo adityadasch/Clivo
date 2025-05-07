@@ -5,7 +5,6 @@ from Tokens import *
 class Lexer:
     @staticmethod
     def generate_tokens(code: str):
-        # code += 'Ʃ'
         # ---------------- Variables---------------------
         tokens = []
         count = 0
