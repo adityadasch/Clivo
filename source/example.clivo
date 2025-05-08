@@ -1,0 +1,6 @@
+int a = 5;
+int b;
+show a;
+string hw = "Hello World!";
+if(2+2==4);
+then show hw;

@@ -1,10 +1,9 @@
-from Lexer import Lexer, Error
+from Lexer import Lexer
 from Parser import Parser
 
-for _ in range(100):
-    code = input('Code:')
-    tokens = Lexer.generate_tokens(code)
-
-    if not isinstance(tokens,list):
-        print(tokens)
-    Parser.parse(tokens, code)
+with open('source/example.clivo', 'r') as f:
+    line = f.read()
+for _code in line.split('\n'):
+    tokens = Lexer.generate_tokens(_code)
+    if len(tokens) > 0:
+        Parser.parse(tokens, _code)

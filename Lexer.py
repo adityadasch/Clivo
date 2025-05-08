@@ -1,5 +1,5 @@
 import Tokens
-from Error import Error, SyntaxError
+from Error import SyntaxError, raise_
 from Tokens import *
 
 class Lexer:
@@ -13,7 +13,7 @@ class Lexer:
                             '=': EQUAL, '+': PLUS, '-': MINUS, '*': MUL, '^':'CARAT',
                             '/': DIV, '#':HASH, '%':MOD, '&':AND, '|': OR, '!': NOT,
                             '(': LEFT_PAREN, ')': RIGHT_PAREN, '[': LEFT_BRACE, ']': RIGHT_BRACE,
-                            '{': LEFT_SET, '}': RIGHT_SET, ':': COLON, ';': SEMICOLON, '$':ACCESS,
+                            '{': LEFT_SET, '}': RIGHT_SET, ':': COLON, ';': END, '$':ACCESS,
                             '>': GREATER, '<': LESSER
                             }
         alpha = 'abcdefghijklmnopqrstuvwxyz' + 'abcdefghijklmnopqrstuvwxyz'.upper()
@@ -31,8 +31,7 @@ class Lexer:
                 count += 1
                 while run:
                     if count >= len(code):
-                        return SyntaxError('Console','1','Missing quotation(") mark', code)
-                    print(count, code[count])
+                        raise_(SyntaxError('Console','1',f'Missing quotation({check}) mark', code))
                     if code[count] == check:
                         break
                     string += code[count]
@@ -47,7 +46,7 @@ class Lexer:
                 while count < len(code) and code[count] in alpha_numeric :
                     string += code[count]
                     count += 1
-                tokens.append(Token(KEYWORD if string in KEYWORDL else IDENTIFIER ,string))
+                tokens.append(Token(DTYPE if string in DTYPES else KEYWORD if string in KEYWORDS else IDENTIFIER, string))
                 continue
 
             elif code[count] in numeric:
@@ -56,7 +55,9 @@ class Lexer:
                 while count < len(code) and (code[count] in numeric or code[count] == '.') :
                     string += code[count]
                     count += 1
-                tokens.append(Token(NUMBER,string))
+                if string.find('.') != -1:
+                    tokens.append(Token(FLOAT, string))
+                tokens.append(Token(INTEGER,string))
                 continue
 
             count += 1
@@ -68,36 +69,37 @@ class Lexer:
         pop_tok = []
         for index, token in enumerate(tokens):
             if token.type == Tokens.EQUAL and index > 0:
-                if tokens[index - 1].type == Tokens.EQUAL:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.DEQUAL
-                elif tokens[index - 1].type == Tokens.GREATER:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.GEQUAL
-                elif tokens[index - 1].type == Tokens.LESSER:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.LEQUAL
-                elif tokens[index - 1].type == Tokens.PLUS:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.PEQUAL
-                elif tokens[index - 1].type == Tokens.MINUS:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.MEQUAL
-                elif tokens[index - 1].type == Tokens.MUL:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.MULEQUAL
-                elif tokens[index - 1].type == Tokens.COLON:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.REASSIGN
-                elif tokens[index - 1].type == Tokens.MOD:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.MODEQUAL
-                elif tokens[index - 1].type == Tokens.DIV:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.DIVEQUAL
-                elif tokens[index - 1].type == Tokens.NOT:
-                    pop_tok.append(index)
-                    tokens[index-1].type = Tokens.NEQUAL
+                match tokens[index - 1].type:
+                    case Tokens.EQUAL:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.DEQUAL
+                    case Tokens.GREATER:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.GEQUAL
+                    case Tokens.LESSER:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.LEQUAL
+                    case Tokens.PLUS:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.PEQUAL
+                    case Tokens.MINUS:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.MEQUAL
+                    case Tokens.MUL:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.MULEQUAL
+                    case Tokens.COLON:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.REASSIGN
+                    case Tokens.MOD:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.MODEQUAL
+                    case Tokens.DIV:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.DIVEQUAL
+                    case Tokens.NOT:
+                        pop_tok.append(index)
+                        tokens[index-1].type = Tokens.NEQUAL
         for p in pop_tok:
             tokens.pop(p)
         return tokens
