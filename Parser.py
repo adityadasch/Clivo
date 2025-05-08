@@ -1,6 +1,8 @@
 import Tokens
 from Memory import Table, ClassScope, FunctionScope, Variable, Scope
-from Error import RunTimeError, SyntaxError, KeyError, raise_
+from Error import RunTimeError, SyntaxError, KeyError, raise_, DataTypeError
+from Tokens import IDENTIFIER
+
 
 def token_to_dtype(token):
     if token == Tokens.INTEGER:
@@ -14,11 +16,16 @@ def token_to_dtype(token):
 
 class Parser:
     @staticmethod
-    def parse(tokens: list[Tokens.Token], code, file = 'Console', line = '1'):
+    def parse(tokens: list[Tokens.Token], code, file = 'Console', line:int = 1):
         if tokens[-1].type != Tokens.END:
             raise_(SyntaxError(file,line,"Semi-colon is missing", code, column = len(code.rstrip())))
         for index in range(len(tokens)):
             token = tokens[index]
+            if Table.ignore_code:
+                if token.type == Tokens.KEYWORD and token.value == 'end':
+                    Table.ignore_code = False
+                else:
+                    return None
             if tokens[index].type == Tokens.REASSIGN:
                 if tokens[index - 1].type == Tokens.IDENTIFIER and tokens[index + 1].type == Tokens.IDENTIFIER:
                     if Table.variable_table.get(tokens[index - 1].value).dtype == Table.variable_table[
@@ -41,12 +48,16 @@ class Parser:
                             value,
                             dtype
                         )
+                        if not Table.variable_table.get(token.value).check():
+                            raise_(DataTypeError(file, line,"The given value is not of the same type", code))
+
                     else:
                         prev = Table.variable_table[token.value].value
                         value = tokens[index + 2].value if Table.variable_table.get(
                             tokens[index + 2].value) is None else Table.variable_table.get(tokens[index + 2].value).value
                         Table.update_variable(token.value, value)
-                        print('Updated {} from {} to {}'.format(token.value, prev, value))
+                        if not Table.variable_table.get(token.value).check():
+                            raise_(DataTypeError(file, line,"The given value is not of the same type", code))
 
                 elif len(tokens) > 1 and tokens[index - 1].type == Tokens.DTYPE:
                     dtype = tokens[index - 1].value
@@ -58,9 +69,10 @@ class Parser:
 
                 elif len(tokens) > 1 and tokens[index - 1].type == Tokens.KEYWORD:
                     pass
-                # else:
-                #     variable = Table.variable_table.get(token.value)
-                #     print(variable)
+                elif len(tokens) > 1 and tokens[index + 1].type == Tokens.INCREMENT:
+                    if Table.get_variable(token.value).dtype in ['int','float']:
+                        new_value = Table.get_variable(token.value).dt_value + 1
+                        Table.update_variable(token.value, new_value)
 
             elif token.type == Tokens.KEYWORD:
                 if token.value == 'reset':
@@ -71,9 +83,16 @@ class Parser:
                         Tokens.get_default_for_type(dtype),
                         dtype
                     )
+
                 elif token.value == 'show':
                     to_show = tokens[index+1]
-                    print(Table.variable_table.get(to_show.value))
+                    end = '\n'
+                    try:
+                        if tokens[index+2].type == Tokens.KEYWORD and tokens[index+2].value == 'end':
+                            end = tokens[index+3].value
+                    except IndexError:
+                        pass
+                    print(Table.variable_table.get(to_show.value).value if to_show.type == IDENTIFIER else to_show.value, end = end)
 
                 elif token.value == 'if':
                     if tokens[index + 1].type == Tokens.LEFT_PAREN:
@@ -121,7 +140,6 @@ class Parser:
                                                 right = float(right.value)
                                             case _:
                                                 right = right.value
-                                print('Checking {}'.format(str(left) + Tokens.COMPARITIVES_DICT.get(ele.type) + str(right)))
                                 res = eval(
                                     str(left) + Tokens.COMPARITIVES_DICT.get(ele.type) + str(right)
                                 )
@@ -129,8 +147,56 @@ class Parser:
 
                 elif token.value == 'then':
                     if Table.last_result:
-                        Parser.parse(tokens[1::], code, file, line)
+                        return Parser.parse(tokens[1::], code, file, line)
+                    else:
                         break
+
+                elif token.value == 'label':
+                    name = tokens[index+1].value
+                    Table.labels[name] = line
+                    Table.ignore_code = True
+
+                elif token.value == 'goto':
+                    try:
+                        name = tokens[index+1].value
+                        return Table.labels[name]
+                    except IndexError:
+                        continue
+
+                elif token.value == 'del':
+                    if tokens[index+1].type == Tokens.VARIABLE:
+                        try:
+                            name = tokens[index+2]
+                            del Table.variable_table[name.value]
+                        except IndexError:
+                            raise_(KeyError(file,line,"Variable not found", 1))
+                    if tokens[index+1].type == Tokens.LABEL:
+                        try:
+                            name = tokens[index+2]
+                            del Table.labels[name.value]
+                        except IndexError:
+                            raise_(KeyError(file,line,"Label not found", 1))
+
+                elif token.value == 'cast':
+                    try:
+                        variable = tokens[index + 1]
+                        dtype = tokens[index + 3]
+
+                        var = Table.variable_table.get(variable.value)
+                        if var is None:
+                            raise_(KeyError(file, line, 'Variable not found', code, column= code.find(variable.value)))
+                        var.dtype = dtype.value
+                        match dtype.value:
+                            case 'str':
+                                var.value = str(var.value)
+                            case 'int':
+                                var.value = int(var.value)
+                            case 'float':
+                                var.value = float(var.value)
+                    except IndexError:
+                        raise_(SyntaxError(file, line, "Not enough arguments provided", code))
+                    except ValueError:
+                        raise_(DataTypeError(file,line,f"Cannot convert the given data: expected {'float' if var.dtype == 'int' else 'int'}", column = code.find(dtype.value)))
 
             match token.type:
                 case Tokens.PLUS:

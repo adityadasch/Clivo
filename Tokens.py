@@ -8,7 +8,7 @@ class Token:
     def __repr__(self):
         return f'{self.type}: {self.value}' if self.value is not None else f'{self.type}'
 
-KEYWORDS = ['void', 'func', 'scope', 'reset', 'if', 'then', 'show']
+KEYWORDS = ['void', 'func', 'scope', 'reset', 'if', 'then', 'show', 'goto', 'label', 'end', 'del', 'cast', 'into']
 DTYPES = ['int', 'float', 'string']
 
 DTYPE = 'DTYPE'
@@ -18,7 +18,8 @@ INTEGER = 'INTEGER'
 FLOAT = 'FLOAT'
 KEYWORD = 'KEYWORD'
 IDENTIFIER = 'IDENTIFIER'
-ACCESS = 'ACCESS'
+VARIABLE = 'VARIABLE'
+LABEL = 'LABEL'
 NEWLINE = 'NL'
 TAB = 'TB'
 EQUAL = 'EQ'
@@ -53,6 +54,7 @@ COMPARITIVES_DICT = {
 
 REASSIGN = 'REASSIGN'
 PLUS = 'ADD'
+INCREMENT = 'INC'
 MINUS = 'MIN'
 MUL = 'MUL'
 CARAT = 'CAR'
@@ -103,5 +105,4 @@ def is_compatible(self: Token, other: Token):
         (d1 == 'float' and d2 == 'int') or \
         (d1 == INTEGER and d2 == FLOAT) or \
         (d1 == FLOAT and d2 == INTEGER)
-
     return check

@@ -24,6 +24,10 @@ class KeyError(Error):
     def __init__(self, file, line, message, code, **kwargs):
         super().__init__(file, line, message, code, **kwargs)
 
+class DataTypeError(Error):
+    def __init__(self, file, line, message, code, **kwargs):
+        super().__init__(file, line, message, code, **kwargs)
+
 def raise_(error: Error):
     print(error)
     quit()

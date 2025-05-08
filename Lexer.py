@@ -13,12 +13,12 @@ class Lexer:
                             '=': EQUAL, '+': PLUS, '-': MINUS, '*': MUL, '^':'CARAT',
                             '/': DIV, '#':HASH, '%':MOD, '&':AND, '|': OR, '!': NOT,
                             '(': LEFT_PAREN, ')': RIGHT_PAREN, '[': LEFT_BRACE, ']': RIGHT_BRACE,
-                            '{': LEFT_SET, '}': RIGHT_SET, ':': COLON, ';': END, '$':ACCESS,
+                            '{': LEFT_SET, '}': RIGHT_SET, ':': COLON, ';': END, '$':VARIABLE,'@':LABEL,
                             '>': GREATER, '<': LESSER
                             }
         alpha = 'abcdefghijklmnopqrstuvwxyz' + 'abcdefghijklmnopqrstuvwxyz'.upper()
         numeric = '0123456789'
-        alpha_numeric = alpha + numeric
+        alpha_numeric = alpha + numeric + '_'
 
         while count < len(code):
             if code[count] in basic_characters:
@@ -57,6 +57,7 @@ class Lexer:
                     count += 1
                 if string.find('.') != -1:
                     tokens.append(Token(FLOAT, string))
+                    continue
                 tokens.append(Token(INTEGER,string))
                 continue
 
@@ -100,6 +101,11 @@ class Lexer:
                     case Tokens.NOT:
                         pop_tok.append(index)
                         tokens[index-1].type = Tokens.NEQUAL
+            if token.type == Tokens.PLUS and index > 0:
+                match tokens[index - 1].type:
+                    case Tokens.PLUS:
+                        pop_tok.append(index)
+                        tokens[index - 1].type = Tokens.INCREMENT
         for p in pop_tok:
             tokens.pop(p)
         return tokens

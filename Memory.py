@@ -6,6 +6,18 @@ class Variable:
     def __repr__(self):
         return f'{self.value} ({self.dtype})'
 
+    def check(self):
+        try:
+            if self.dtype == 'float':
+                float(self.value)
+                return True
+            elif self.dtype == 'int':
+                int(self.value)
+                return True
+        except ValueError:
+            pass
+        return False
+
     @property
     def dt_value(self):
         match self.dtype:
@@ -45,11 +57,10 @@ class FunctionScope(Scope):
 
 class Table:
     variable_table: dict[str, Variable] = dict() # Identifier: Index in value_table
-    scope_table: dict[str, Scope] = dict() # Scope Id: Scope Object
-    function_table: dict = dict() # Identifier: Function Scope Object
-    class_table: dict = dict() # Identifier: Class Scope Object
+    labels: dict[str, int] = dict() # Scope Id: Scope Object
     callable_table: dict = dict() #
-    last_result:bool = False
+    last_result: bool = False
+    ignore_code: bool = False
 
     @classmethod
     def create_variable(cls, name, value, dtype):
