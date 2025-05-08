@@ -1,0 +1,6 @@
+int number = 10;
+int even = 2;
+if(number % even == 0);
+then show "The number is even";
+if(number % even == 1);
+then show "The number is odd";

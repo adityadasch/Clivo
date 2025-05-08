@@ -1,0 +1,13 @@
+int limit = 10;
+int fr_var = 0;
+int sum = 0;
+label add;
+    int new_sum = sum * fr_var;
+    sum = new_sum;
+    del $new_sum;
+    fr_var++;
+end;
+if(fr_var<limit);
+then goto add;
+show "The sum is:" end ' ';
+show sum;
