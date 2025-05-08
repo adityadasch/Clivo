@@ -125,4 +125,7 @@ show sum;
 
 + #### No functions or return statements yet.
 
+# Running
+To run a .clivo file run
+`<path-to-.exe> <path-to-file>`
 # Happy coding!
