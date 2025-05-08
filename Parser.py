@@ -232,11 +232,10 @@ class Parser:
                 addend2 = Table.variable_table.get(addend_2.value)
                 addend2 = addend2.dt_value
 
-            return addend+addend2
-
+            return addend + addend2 if sign == '+' else addend - addend2 if sign == '-' else addend * addend2 if sign == '*' \
+                else addend / addend2 if sign == '/' else addend % addend2
 
         return None
-
 
     @staticmethod
     def parse_exp(tokens: list[Tokens.Token]):
@@ -246,9 +245,11 @@ class Parser:
                 case Tokens.PLUS:
                     return Parser.alu(index, tokens)
                 case Tokens.MINUS:
-                    return Parser.alu(index, tokens, sign = '-')
+                    return Parser.alu(index, tokens, sign='-')
                 case Tokens.MUL:
-                    return Parser.alu(index, tokens, sign = '*')
+                    return Parser.alu(index, tokens, sign='*')
                 case Tokens.DIV:
                     return Parser.alu(index, tokens, sign='/')
+                case Tokens.MOD:
+                    return Parser.alu(index, tokens, sign='%')
         return None
