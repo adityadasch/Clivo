@@ -198,16 +198,6 @@ class Parser:
                     except ValueError:
                         raise_(DataTypeError(file,line,f"Cannot convert the given data: expected {'float' if var.dtype == 'int' else 'int'}", column = code.find(dtype.value)))
 
-            match token.type:
-                case Tokens.PLUS:
-                    Parser.alu(index, tokens)
-                case Tokens.MINUS:
-                    Parser.alu(index, tokens, sign = '-')
-                case Tokens.MUL:
-                    Parser.alu(index, tokens, sign = '*')
-                case Tokens.DIV:
-                    Parser.alu(index, tokens, sign='/')
-
         return  None
 
     @staticmethod
