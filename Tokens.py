@@ -8,7 +8,7 @@ class Token:
     def __repr__(self):
         return f'{self.type}: {self.value}' if self.value is not None else f'{self.type}'
 
-KEYWORDS = ['void', 'func', 'scope', 'reset', 'if', 'then', 'show', 'goto', 'label', 'end', 'del', 'cast', 'into']
+KEYWORDS = ['void', 'func', 'scope', 'reset', 'if', 'then', 'else', 'show', 'goto', 'label', 'end', 'del', 'cast', 'into']
 DTYPES = ['int', 'float', 'string']
 
 DTYPE = 'DTYPE'

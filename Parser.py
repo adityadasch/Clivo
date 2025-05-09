@@ -150,6 +150,11 @@ class Parser:
                         return Parser.parse(tokens[1::], code, file, line)
                     else:
                         break
+                elif token.value == 'else':
+                    if not Table.last_result:
+                        return Parser.parse(tokens[1::], code, file, line)
+                    else:
+                        break
 
                 elif token.value == 'label':
                     name = tokens[index+1].value
