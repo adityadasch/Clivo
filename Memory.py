@@ -61,6 +61,7 @@ class Table:
     callable_table: dict = dict() #
     last_result: bool = False
     ignore_code: bool = False
+    line_: int = 0
 
     @classmethod
     def create_variable(cls, name, value, dtype):
